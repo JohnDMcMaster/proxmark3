@@ -16,8 +16,8 @@
 #include <usb.h>
 #include "usb_cmd.h"
 
-extern unsigned char return_on_error;
-extern unsigned char error_occured;
+extern unsigned char g_return_on_error;
+extern unsigned char g_error_occured;
 
 void SendCommand(UsbCommand *c);
 bool ReceiveCommandPoll(UsbCommand *c);

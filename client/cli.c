@@ -12,8 +12,8 @@
 #include "proxusb.h"
 #include "cmdmain.h"
 
-#define HANDLE_ERROR if (error_occured) { \
-  error_occured = 0;\
+#define HANDLE_ERROR if (g_error_occured) { \
+  g_error_occured = 0;\
   break;\
 }
 
@@ -34,7 +34,7 @@ int main(int argc, char **argv)
   else
     SetLogFilename("cli.log");
 
-  return_on_error = 1;
+  g_return_on_error = 1;
 
   while (1) {
     while (!OpenProxmark(0)) { sleep(1); }

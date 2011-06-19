@@ -23,7 +23,6 @@
 #include "cmdlf.h"
 #include "cmdmain.h"
 
-unsigned int current_command = CMD_UNKNOWN;
 unsigned int received_command = CMD_UNKNOWN;
 UsbCommand current_response;
 UsbCommand current_response_user;
@@ -95,7 +94,7 @@ void CommandReceived(char *Cmd)
 //-----------------------------------------------------------------------------
 void UsbCommandReceived(UsbCommand *UC)
 {
-  //	printf("%s(%x) current cmd = %x\n", __FUNCTION__, c->cmd, current_command);
+  //	printf("%s(%x) current cmd = %x\n", __FUNCTION__, c->cmd, g_current_command);
   /* If we recognize a response, return to avoid further processing */
   switch(UC->cmd) {
     case CMD_DEBUG_PRINT_STRING: {
@@ -141,7 +140,7 @@ void UsbCommandReceived(UsbCommand *UC)
       break;
   }
   /* Maybe it's a response: */
-  switch(current_command) {
+  switch(g_current_command) {
     case CMD_DOWNLOAD_RAW_ADC_SAMPLES_125K:
       if (UC->cmd != CMD_DOWNLOADED_RAW_ADC_SAMPLES_125K) goto unexpected_response;
       int i;

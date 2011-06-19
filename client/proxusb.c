@@ -18,6 +18,7 @@
 #include <strings.h>
 #include <errno.h>
 
+#include "cmddata.h"
 #include "sleep.h"
 #include "proxusb.h"
 #include "proxmark3.h"
@@ -28,11 +29,11 @@
 #define ETIMEDOUT 116
 #endif
 
-usb_dev_handle *devh = NULL;
-static unsigned int claimed_iface = 0;
-unsigned char return_on_error = 0;
-unsigned char error_occured = 0;
-extern unsigned int current_command;
+static usb_dev_handle *g_devh = NULL;
+static unsigned int g_claimed_iface = 0;
+unsigned char g_return_on_error = 0;
+unsigned char g_error_occured = 0;
+unsigned int g_current_command = CMD_UNKNOWN;
 
 void SendCommand(UsbCommand *c)
 {
@@ -41,19 +42,19 @@ void SendCommand(UsbCommand *c)
 #if 0
   printf("Sending %d bytes\n", sizeof(UsbCommand));
 #endif
-  current_command = c->cmd;
-  ret = usb_bulk_write(devh, 0x01, (char*)c, sizeof(UsbCommand), 1000);
+  g_current_command = c->cmd;
+  ret = usb_bulk_write(g_devh, 0x01, (char*)c, sizeof(UsbCommand), 1000);
   if (ret<0) {
-    error_occured = 1;
-    if (return_on_error)
+    g_error_occured = 1;
+    if (g_return_on_error)
       return;
 
     fprintf(stderr, "write failed: %s!\nTrying to reopen device...\n",
       usb_strerror());
 
-    if (devh) {
-      usb_close(devh);
-      devh = NULL;
+    if (g_devh) {
+      usb_close(g_devh);
+      g_devh = NULL;
     }
     while(!OpenProxmark(0)) { sleep(1); }
     printf(PROXPROMPT);
@@ -68,19 +69,19 @@ bool ReceiveCommandPoll(UsbCommand *c)
   int ret;
 
   memset(c, 0, sizeof (UsbCommand));
-  ret = usb_bulk_read(devh, 0x82, (char*)c, sizeof(UsbCommand), 500);
+  ret = usb_bulk_read(g_devh, 0x82, (char*)c, sizeof(UsbCommand), 500);
   if (ret<0) {
     if (ret != -ETIMEDOUT) {
-      error_occured = 1;
-      if (return_on_error)
+      g_error_occured = 1;
+      if (g_return_on_error)
         return false;
 
       fprintf(stderr, "read failed: %s(%d)!\nTrying to reopen device...\n",
         usb_strerror(), ret);
 
-      if (devh) {
-        usb_close(devh);
-        devh = NULL;
+      if (g_devh) {
+        usb_close(g_devh);
+        g_devh = NULL;
       }
       while(!OpenProxmark(0)) { sleep(1); }
       printf(PROXPROMPT);
@@ -209,14 +210,14 @@ usb_dev_handle* OpenProxmark(int verbose)
       fprintf(stderr, "claim failed: %s!\n", usb_strerror());
     return NULL;
   }
-  claimed_iface = iface;
-  devh = handle;
+  g_claimed_iface = iface;
+  g_devh = handle;
   return handle;
 }
 
 void CloseProxmark(void)
 {
-  usb_release_interface(devh, claimed_iface);
-  usb_close(devh);
-  devh = NULL;
+  usb_release_interface(g_devh, g_claimed_iface);
+  usb_close(g_devh);
+  g_devh = NULL;
 }

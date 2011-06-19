@@ -11,6 +11,8 @@
 #ifndef CMDDATA_H__
 #define CMDDATA_H__
 
+extern unsigned int g_current_command;
+
 int CmdData(const char *Cmd);
 
 int CmdAmp(const char *Cmd);
