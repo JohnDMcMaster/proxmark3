@@ -3,3 +3,4 @@ flasher
 proxmark3
 snooper
 .history
+*.log
