@@ -19,7 +19,7 @@
 
 /* low-level hardware control */
 
-static int CmdHelp(const char *Cmd);
+static int CmdHWHelp(const char *Cmd);
 
 int CmdDetectReader(const char *Cmd)
 {
@@ -127,7 +127,7 @@ int CmdVersion(const char *Cmd)
 
 static command_t CommandTable[] = 
 {
-  {"help",          CmdHelp,        1, "This help"},
+  {"help",          CmdHWHelp,        1, "This help"},
   {"detectreader",  CmdDetectReader,0, "['l'|'h'] -- Detect external reader field (option 'l' or 'h' to limit to LF or HF)"},
   {"fpgaoff",       CmdFPGAOff,     0, "Set FPGA off"},
   {"lcd",           CmdLCD,         0, "<HEX command> <count> -- Send command/data to LCD"},
@@ -147,7 +147,7 @@ int CmdHW(const char *Cmd)
   return 0;
 }
 
-int CmdHelp(const char *Cmd)
+int CmdHWHelp(const char *Cmd)
 {
   CmdsHelp(CommandTable);
   return 0;
