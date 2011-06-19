@@ -20,6 +20,5 @@ void SetLogFilename(char *fn);
 
 extern double CursorScaleFactor;
 extern int PlotGridX, PlotGridY;
-extern int offline;
 
 #endif

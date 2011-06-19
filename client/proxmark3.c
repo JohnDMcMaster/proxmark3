@@ -108,10 +108,10 @@ int main(int argc, char **argv)
 	if (!OpenProxmark(1)) {
 		fprintf(stderr,"PROXMARK3: NOT FOUND!\n");
 		marg.usb_present = 0;
-		offline = 1;
+		g_offline = 1;
 	} else {
 		marg.usb_present = 1;
-		offline = 0;
+		g_offline = 0;
 	}
 
 	pthread_create(&main_loop_t, NULL, &main_loop, &marg);

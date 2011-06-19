@@ -12,6 +12,10 @@
 #include <string.h>
 #include "ui.h"
 #include "cmdparser.h"
+#include "proxmark3.h"
+
+//Set to true if the proxmark is not availible
+int g_offline;
 
 void CmdsHelp(const command_t Commands[])
 {
@@ -20,7 +24,7 @@ void CmdsHelp(const command_t Commands[])
 	int i = 0;
 	while (Commands[i].Name)
 	{
-		if (!offline || Commands[i].Offline)
+		if (!g_offline || Commands[i].Offline)
 			PrintAndLog("%-16s %s", Commands[i].Name, Commands[i].Help);
 		++i;
 	}
@@ -33,10 +37,12 @@ void CmdsParse(const command_t Commands[], const char *Cmd)
 	memset(cmd_name, 0, 32);
 	sscanf(Cmd, "%31s%n", cmd_name, &len);
 	int i = 0;
+	
+	//First try to find exact match
 	while (Commands[i].Name && strcmp(Commands[i].Name, cmd_name))
 		++i;
 
-	/* try to find exactly one prefix-match */
+	//Fallback to find exactly one prefix-match if we couldn't find an exact match
 	if(!Commands[i].Name) {
 		int last_match = 0;
 		int matches = 0;
@@ -50,11 +56,17 @@ void CmdsParse(const command_t Commands[], const char *Cmd)
 		if(matches == 1) i=last_match;
 	}
 
+	//Did we find something?
 	if (Commands[i].Name) {
 		while (Cmd[len] == ' ')
 			++len;
-		Commands[i].Parse(Cmd + len);
+		if (g_offline && !Commands[i].Offline) {
+			PrintAndLog("%s: cannot be used offline", Commands[i].Name);
+		} else {
+			Commands[i].Parse(Cmd + len);
+		}
 	} else {
+		PrintAndLog("%s: unknown command", Cmd);
 		// show help for selected hierarchy or if command not recognised
 		CmdsHelp(Commands);
 	}

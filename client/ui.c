@@ -17,7 +17,6 @@
 
 double CursorScaleFactor;
 int PlotGridX, PlotGridY;
-int offline;
 
 static char *logfilename = "proxmark3.log";
 

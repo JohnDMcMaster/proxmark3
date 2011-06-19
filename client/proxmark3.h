@@ -14,4 +14,6 @@
 
 #define PROXPROMPT "proxmark3> "
 
+extern int g_offline;
+
 #endif
