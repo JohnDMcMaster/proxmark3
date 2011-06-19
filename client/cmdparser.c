@@ -21,12 +21,23 @@ void CmdsHelp(const command_t Commands[])
 {
 	if (Commands[0].Name == NULL)
 		return;
-	int i = 0;
-	while (Commands[i].Name)
-	{
+		
+	if (g_offline) {
+		unsigned int n_online = 0;
+		
+		for (int i = 0; Commands[i].Name; ++i) {
+			if (!Commands[i].Offline) {
+				++n_online;
+			}
+		}
+		if (n_online) {
+			PrintAndLog("Suppressing %d online commands", n_online);
+		}
+	}
+	
+	for (int i = 0; Commands[i].Name; ++i) {
 		if (!g_offline || Commands[i].Offline)
 			PrintAndLog("%-16s %s", Commands[i].Name, Commands[i].Help);
-		++i;
 	}
 }
 
@@ -66,7 +77,10 @@ void CmdsParse(const command_t Commands[], const char *Cmd)
 			Commands[i].Parse(Cmd + len);
 		}
 	} else {
-		PrintAndLog("%s: unknown command", Cmd);
+		//We can get empty command from sub help mode such as entering "hf" as opposed to "hf help" or "" which is ignored alltogether
+		if (strlen(Cmd) != 0) {
+			PrintAndLog("%s: unknown command", Cmd);
+		}
 		// show help for selected hierarchy or if command not recognised
 		CmdsHelp(Commands);
 	}
