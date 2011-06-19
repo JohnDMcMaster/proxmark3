@@ -14,7 +14,8 @@ OBJDIR = obj
 
 LDLIBS = -L/opt/local/lib -L/usr/local/lib -lusb -lreadline -lpthread
 LDFLAGS = $(COMMON_FLAGS)
-CFLAGS = -std=gnu99 -I. -I../include -I../common -I/opt/local/include -Wall -Wno-unused-function $(COMMON_FLAGS) -g -O3
+CFLAGS = -std=gnu99 -I. -I../include -I../common -I/opt/local/include -Wall -Wno-unused-function $(COMMON_FLAGS) -g $(OPT_FLAGS)
+OPT_FLAGS=-O3
 
 ifneq (,$(findstring MINGW,$(platform)))
 CXXFLAGS = -I$(QTDIR)/include -I$(QTDIR)/include/QtCore -I$(QTDIR)/include/QtGui
@@ -25,7 +26,7 @@ CXXFLAGS = -I/Library/Frameworks/QtGui.framework/Versions/Current/Headers -I/Lib
 QTLDLIBS = -framework QtGui -framework QtCore
 MOC = moc 
 else
-CXXFLAGS = $(shell pkg-config --cflags QtCore QtGui 2>/dev/null) -Wall -O3
+CXXFLAGS = $(shell pkg-config --cflags QtCore QtGui 2>/dev/null) -Wall $(OPT_FLAGS)
 QTLDLIBS = $(shell pkg-config --libs QtCore QtGui 2>/dev/null)
 MOC = $(shell pkg-config --variable=moc_location QtCore)
 endif
