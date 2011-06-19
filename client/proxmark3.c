@@ -23,48 +23,48 @@
 
 struct usb_receiver_arg
 {
-  int run;
+	int run;
 };
 
 struct main_loop_arg
 {
-  int usb_present;
+	int usb_present;
 };
 
 static void *usb_receiver(void *targ)
 {
-  struct usb_receiver_arg *arg = (struct usb_receiver_arg*)targ;
-  UsbCommand cmdbuf;
+	struct usb_receiver_arg *arg = (struct usb_receiver_arg*)targ;
+	UsbCommand cmdbuf;
 
-  while (arg->run) {
-    if (ReceiveCommandPoll(&cmdbuf)) {
-      for (int i = 0; i < strlen(PROXPROMPT); i++)
-        putchar(0x08);
-      UsbCommandReceived(&cmdbuf);
+	while (arg->run) {
+		if (ReceiveCommandPoll(&cmdbuf)) {
+			for (int i = 0; i < strlen(PROXPROMPT); i++)
+				putchar(0x08);
+			UsbCommandReceived(&cmdbuf);
 			// there is a big bug )
 			if (cmdbuf.cmd > 0x0100 && cmdbuf.cmd < 0x0110) { // debug commands
 				rl_on_new_line_with_prompt();
 				rl_forced_update_display();
 			}
-      fflush(NULL);
-    }
-  }
+			fflush(NULL);
+		}
+	}
 
-  pthread_exit(NULL);
-  return NULL;
+	pthread_exit(NULL);
+	return NULL;
 }
 
 static void *main_loop(void *targ)
 {
-  struct main_loop_arg *arg = (struct main_loop_arg*)targ;
-  struct usb_receiver_arg rarg;
-  char *cmd = NULL;
-  pthread_t reader_thread;
+	struct main_loop_arg *arg = (struct main_loop_arg*)targ;
+	struct usb_receiver_arg rarg;
+	char *cmd = NULL;
+	pthread_t reader_thread;
 
-  if (arg->usb_present == 1) {
-    rarg.run=1;
-    pthread_create(&reader_thread, NULL, &usb_receiver, &rarg);
-  }
+	if (arg->usb_present == 1) {
+		rarg.run=1;
+		pthread_create(&reader_thread, NULL, &usb_receiver, &rarg);
+	}
 
 	read_history(".history");
 	while(1) {
@@ -89,40 +89,40 @@ static void *main_loop(void *targ)
 		}
 	}
 
-  if (arg->usb_present == 1) {
-    rarg.run = 0;
-    pthread_join(reader_thread, NULL);
-  }
+	if (arg->usb_present == 1) {
+		rarg.run = 0;
+		pthread_join(reader_thread, NULL);
+	}
 
-  ExitGraphics();
-  pthread_exit(NULL);
-  return NULL;
+	ExitGraphics();
+	pthread_exit(NULL);
+	return NULL;
 }
 
 int main(int argc, char **argv)
 {
-  struct main_loop_arg marg;
-  pthread_t main_loop_t;
-  usb_init();
+	struct main_loop_arg marg;
+	pthread_t main_loop_t;
+	usb_init();
 
-  if (!OpenProxmark(1)) {
-    fprintf(stderr,"PROXMARK3: NOT FOUND!\n");
-    marg.usb_present = 0;
-    offline = 1;
-  } else {
-    marg.usb_present = 1;
-    offline = 0;
-  }
+	if (!OpenProxmark(1)) {
+		fprintf(stderr,"PROXMARK3: NOT FOUND!\n");
+		marg.usb_present = 0;
+		offline = 1;
+	} else {
+		marg.usb_present = 1;
+		offline = 0;
+	}
 
-  pthread_create(&main_loop_t, NULL, &main_loop, &marg);
-  InitGraphics(argc, argv);
+	pthread_create(&main_loop_t, NULL, &main_loop, &marg);
+	InitGraphics(argc, argv);
 
-  MainGraphics();
+	MainGraphics();
 
-  pthread_join(main_loop_t, NULL);
+	pthread_join(main_loop_t, NULL);
 
-  if (marg.usb_present == 1) {
-    CloseProxmark();
-  }
-  return 0;
+	if (marg.usb_present == 1) {
+		CloseProxmark();
+	}
+	return 0;
 }
